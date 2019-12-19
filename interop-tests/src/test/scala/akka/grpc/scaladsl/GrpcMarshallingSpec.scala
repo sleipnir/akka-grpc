@@ -8,7 +8,6 @@ import akka.actor.ActorSystem
 import akka.grpc.internal.{ AbstractGrpcProtocol, GrpcProtocolNative, Gzip }
 import akka.grpc.scaladsl.headers.`Message-Encoding`
 import akka.http.scaladsl.model.{ HttpEntity, HttpRequest }
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import io.grpc.{ Status, StatusException }
 import io.grpc.testing.integration.messages.{ BoolValue, SimpleRequest }
