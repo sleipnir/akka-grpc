@@ -30,7 +30,7 @@ case class AkkaGrpcServerScala(serverHandlerFactory: Materializer => ActorSystem
     extends GrpcServer[(ActorSystem, ServerBinding)] {
   override def start() = {
     implicit val sys = ActorSystem()
-    implicit val mat = ActorMaterializer()
+    implicit val mat = Materializer(sys)
     implicit val ec = sys.dispatcher
 
     val testService = serverHandlerFactory(mat)(sys)

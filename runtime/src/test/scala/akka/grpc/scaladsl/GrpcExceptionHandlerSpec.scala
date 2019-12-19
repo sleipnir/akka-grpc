@@ -21,7 +21,6 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class GrpcExceptionHandlerSpec extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterAll {
   implicit val system = ActorSystem("Test")
-  implicit val materializer = ActorMaterializer()
 
   val expected: Function[Throwable, Status] = {
     case e: ExecutionException =>

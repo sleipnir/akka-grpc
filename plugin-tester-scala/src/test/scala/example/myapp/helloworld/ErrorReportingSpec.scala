@@ -27,8 +27,6 @@ class ErrorReportingSpec extends AnyWordSpec with Matchers with ScalaFutures wit
   override implicit val patienceConfig = PatienceConfig(5.seconds, Span(100, org.scalatest.time.Millis))
 
   "A gRPC server" should {
-    implicit val mat = ActorMaterializer()
-
     val binding = Http()
       .bindAndHandleAsync(
         GreeterServiceHandler(new GreeterServiceImpl()),
@@ -37,7 +35,7 @@ class ErrorReportingSpec extends AnyWordSpec with Matchers with ScalaFutures wit
         // We test responding to invalid requests with HTTP/1.1 since
         // we don't have a raw HTTP/2 client available to construct invalid
         // HTTP/2 requests.
-        connectionContext = HttpConnectionContext(UseHttp2.Never))
+        connectionContext = HttpConnectionContext())
       .futureValue
 
     "respond with an 'unimplemented' gRPC error status when calling an unknown method" in {

@@ -16,7 +16,6 @@ object AuthenticatedGreeterClient {
   def main(args: Array[String]): Unit = {
     // Boot akka
     implicit val sys = ActorSystem("HelloWorldClient")
-    implicit val mat = ActorMaterializer()
     implicit val ec = sys.dispatcher
 
     // Take details how to connect to the service from the config.

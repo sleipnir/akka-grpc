@@ -105,9 +105,8 @@ final class ClientState(
       () => channelFactory(settings),
       settings.creationAttempts,
       settings.creationDelay,
-      // TODO #733 remove cast once we update Akka
-      mat.asInstanceOf[ActorMaterializer].system.scheduler,
-      mat.asInstanceOf[ActorMaterializer].system.dispatcher)
+      mat.system.scheduler,
+      mat.system.dispatcher)
 
   private def recreateOnFailure(done: Future[Done], creationsLeft: Int): Unit =
     done.onComplete {
@@ -127,9 +126,8 @@ final class ClientState(
 
           Patterns.after(
             settings.creationDelay,
-            // TODO #733 remove cast once we update Akka
-            mat.asInstanceOf[ActorMaterializer].system.scheduler,
-            mat.asInstanceOf[ActorMaterializer].system.dispatcher,
+            mat.system.scheduler,
+            mat.system.dispatcher,
             () =>
               Future {
                 log.info("Recreating channel now")

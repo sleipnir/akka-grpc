@@ -55,10 +55,7 @@ object GrpcResponseHelpers {
       codec: Codec,
       system: ActorSystem): HttpResponse = {
     implicit val ec = mat.executionContext
-    GrpcResponseHelpers(
-      e,
-      Source.lazilyAsync(() => status.map(trailer(_))).mapMaterializedValue(_ => NotUsed),
-      eHandler)
+    GrpcResponseHelpers(e, Source.lazyFuture(() => status.map(trailer(_))).mapMaterializedValue(_ => NotUsed), eHandler)
   }
 
   def apply[T](

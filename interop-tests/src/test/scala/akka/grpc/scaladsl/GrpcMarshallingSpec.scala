@@ -16,17 +16,17 @@ import io.grpc.{ Status, StatusException }
 import io.grpc.testing.integration.messages.{ BoolValue, SimpleRequest }
 import io.grpc.testing.integration.test.TestService
 import org.junit.Assert.assertEquals
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.{ Await, Future }
 import scala.util.Failure
 
-class GrpcMarshallingSpec extends WordSpec with Matchers {
+class GrpcMarshallingSpec extends AnyWordSpec with Matchers {
   "The scaladsl GrpcMarshalling" should {
     val message = SimpleRequest(responseCompressed = Some(BoolValue.of(true)))
     implicit val serializer = TestService.Serializers.SimpleRequestSerializer
     implicit val system = ActorSystem()
-    implicit val mat = ActorMaterializer()
     val awaitTimeout = 10.seconds
     val zippedBytes = Grpc.encodeFrame(Grpc.compressed, Gzip.compress(serializer.serialize(message)))
 

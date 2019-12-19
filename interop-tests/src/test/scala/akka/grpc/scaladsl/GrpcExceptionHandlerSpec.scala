@@ -26,7 +26,6 @@ class GrpcExceptionHandlerSpec
     with AnyWordSpecLike
     with Matchers
     with ScalaFutures {
-  implicit val mat = ActorMaterializer()
   implicit val ec = system.dispatcher
 
   "The default ExceptionHandler" should {
@@ -44,6 +43,7 @@ class GrpcExceptionHandlerSpec
           chunks.runWith(Sink.seq).futureValue match {
             case Seq(LastChunk("", List(`Status`("3")))) => // ok
           }
+        case other => fail(s"unexpected [$other]")
       }
     }
   }

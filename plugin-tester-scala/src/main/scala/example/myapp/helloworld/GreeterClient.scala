@@ -20,7 +20,6 @@ object GreeterClient {
   def main(args: Array[String]): Unit = {
     // Boot akka
     implicit val sys = ActorSystem("HelloWorldClient")
-    implicit val mat = ActorMaterializer()
     implicit val ec = sys.dispatcher
 
     // Take details how to connect to the service from the config.
@@ -34,7 +33,7 @@ object GreeterClient {
     runStreamingReplyExample()
     runStreamingRequestReplyExample()
 
-    sys.scheduler.schedule(1.second, 1.second) {
+    sys.scheduler.scheduleWithFixedDelay(1.second, 1.second) { () =>
       runSingleRequestReplyExample()
     }
 

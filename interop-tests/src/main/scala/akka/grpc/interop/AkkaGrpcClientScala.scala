@@ -20,7 +20,7 @@ final case class AkkaGrpcClientScala(clientTesterFactory: Settings => Materializ
     val settings = Settings.parseArgs(args)
 
     implicit val sys = ActorSystem()
-    implicit val mat = ActorMaterializer()
+    implicit val mat = Materializer(sys)
 
     val client = new TestServiceClient(clientTesterFactory(settings)(mat)(sys))
     client.setUp()

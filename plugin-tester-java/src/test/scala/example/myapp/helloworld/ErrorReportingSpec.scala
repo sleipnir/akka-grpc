@@ -9,7 +9,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpEntity.{ Chunked, LastChunk }
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ HttpMethods, HttpRequest, HttpResponse, StatusCodes }
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import example.myapp.helloworld.grpc.{ GreeterService, GreeterServiceHandlerFactory }
 import io.grpc.Status
@@ -27,22 +27,13 @@ class ErrorReportingSpec extends AnyWordSpec with Matchers with ScalaFutures wit
   override implicit val patienceConfig = PatienceConfig(5.seconds, Span(100, org.scalatest.time.Millis))
 
   "A gRPC server" should {
-    implicit val mat = ActorMaterializer()
+    val mat = implicitly[Materializer]
 
     val handler = GreeterServiceHandlerFactory.create(new GreeterServiceImpl(mat), mat, sys)
     val binding = {
-      import akka.http.javadsl.{ ConnectHttp, Http, HttpConnectionContext, UseHttp2 }
+      import akka.http.javadsl.{ ConnectHttp, Http, HttpConnectionContext }
 
-      Http(sys)
-        .bindAndHandleAsync(
-          handler,
-          // We test responding to invalid requests with HTTP/1.1 since
-          // we don't have a raw HTTP/2 client available to construct invalid
-          // HTTP/2 requests.
-          ConnectHttp.toHost("127.0.0.1", 0, UseHttp2.never),
-          mat)
-        .toCompletableFuture
-        .get
+      Http(sys).bindAndHandleAsync(handler, ConnectHttp.toHost("127.0.0.1", 0), mat).toCompletableFuture.get
     }
 
     "respond with an 'unimplemented' gRPC error status when calling an unknown method" in {
