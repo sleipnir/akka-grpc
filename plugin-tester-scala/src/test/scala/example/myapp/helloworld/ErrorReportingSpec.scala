@@ -28,8 +28,6 @@ class ErrorReportingSpec extends AnyWordSpec with Matchers with ScalaFutures wit
   override implicit val patienceConfig = PatienceConfig(5.seconds, Span(100, org.scalatest.time.Millis))
 
   "A gRPC server" should {
-    implicit val mat = ActorMaterializer()
-
     val binding = Http()
       .bindAndHandleAsync(
         GreeterServiceHandler(new GreeterServiceImpl()),
