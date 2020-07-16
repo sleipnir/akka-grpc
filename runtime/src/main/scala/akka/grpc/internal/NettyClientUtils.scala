@@ -5,8 +5,8 @@
 package akka.grpc.internal
 
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
 
+import javax.net.ssl.SSLContext
 import akka.Done
 import akka.annotation.InternalApi
 import akka.event.LoggingAdapter
@@ -15,6 +15,8 @@ import io.grpc.CallOptions
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts
 import io.grpc.netty.shaded.io.grpc.netty.NegotiationType
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
+import io.grpc.netty.shaded.io.netty.channel.epoll.EpollDomainSocketChannel
+import io.grpc.netty.shaded.io.netty.channel.unix.DomainSocketAddress
 import io.grpc.netty.shaded.io.netty.handler.ssl.{ SslContext, SslContextBuilder }
 
 import scala.concurrent.duration.FiniteDuration
@@ -34,19 +36,29 @@ object NettyClientUtils {
   @InternalApi
   def createChannel(settings: GrpcClientSettings, log: LoggingAdapter)(
       implicit ec: ExecutionContext): InternalChannel = {
-    var builder =
-      NettyChannelBuilder
-        // Not sure why netty wants to be able to shoe-horn the target into a URI... but ok,
-        // we follow their lead and encode the service name as the 'authority' of the URI.
-        .forTarget("//" + settings.serviceName)
-        .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
-        .nameResolverFactory(
-          new AkkaDiscoveryNameResolverProvider(
-            settings.serviceDiscovery,
-            settings.defaultPort,
-            settings.servicePortName,
-            settings.serviceProtocol,
-            settings.resolveTimeout))
+    var builder = settings.useDomainSockets match {
+      case true => {
+        NettyChannelBuilder
+          // Use Unix Domain Sockets requires path of file and EpollDomainSocketChannel type
+          .forAddress(new DomainSocketAddress(settings.domainSocketAddress))
+          .channelType(classOf[EpollDomainSocketChannel])
+          .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
+      }
+      case _ => {
+        NettyChannelBuilder
+          // Not sure why netty wants to be able to shoe-horn the target into a URI... but ok,
+          // we follow their lead and encode the service name as the 'authority' of the URI.
+          .forTarget("//" + settings.serviceName)
+          .flowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
+          .nameResolverFactory(
+            new AkkaDiscoveryNameResolverProvider(
+              settings.serviceDiscovery,
+              settings.defaultPort,
+              settings.servicePortName,
+              settings.serviceProtocol,
+              settings.resolveTimeout))
+      }
+    }
 
     if (!settings.useTls)
       builder = builder.usePlaintext()

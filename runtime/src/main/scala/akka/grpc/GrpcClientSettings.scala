@@ -179,6 +179,8 @@ object GrpcClientSettings {
 @ApiMayChange
 final class GrpcClientSettings private (
     val serviceName: String,
+    val useDomainSockets: Boolean,
+    val domainSocketAddress: String,
     val serviceDiscovery: ServiceDiscovery,
     val defaultPort: Int,
     val resolveTimeout: FiniteDuration,
@@ -201,6 +203,12 @@ final class GrpcClientSettings private (
   require(
     if (sslContext.isDefined) sslProvider.forall(_ == SslProvider.JDK) else true,
     "When sslContext is configured, sslProvider must not set to something different than JDK")
+
+  /**
+   * If using Unix Domain Sockets then set file socket addres
+   */
+  def withDomainSockets(value: Boolean): GrpcClientSettings = copy(useDomainSockets = value)
+  def withDomainSocketsAddress(value: String): GrpcClientSettings = copy(domainSocketAddress = value)
 
   /**
    * If using ServiceDiscovery and no port is returned use this one.
@@ -275,6 +283,8 @@ final class GrpcClientSettings private (
 
   private def copy(
       serviceName: String = serviceName,
+      useDomainSockets: Boolean = useDomainSockets,
+      domainSocketAddress: String = domainSocketAddress,
       servicePortName: Option[String] = servicePortName,
       serviceProtocol: Option[String] = serviceProtocol,
       defaultPort: Int = defaultPort,
@@ -298,6 +308,8 @@ final class GrpcClientSettings private (
       serviceProtocol = serviceProtocol,
       deadline = deadline,
       serviceName = serviceName,
+      useDomainSockets = useDomainSockets,
+      domainSocketAddress = domainSocketAddress,
       overrideAuthority = overrideAuthority,
       defaultPort = defaultPort,
       sslProvider = sslProvider,
